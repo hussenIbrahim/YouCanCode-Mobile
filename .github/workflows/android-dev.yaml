@@ -100,8 +100,15 @@ jobs:
       - name: Build APK
         run: flutter build apk --debug --build-name=1.0.0 --build-number=1
         
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      # - name: Upload APK
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: android-debug-apk
+      #     path: build/app/outputs/flutter-apk/app-debug.apk
+
+      - name: Push to Releases
+        uses: ncipollo/release-action@v1
         with:
-          name: android-debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          artifacts: "build/app/outputs/flutter-apk/app-debug.apk"
+          tag: v1.0.${{ github.run_number }}
+          token: ${{ secrets.TOKEN }}
