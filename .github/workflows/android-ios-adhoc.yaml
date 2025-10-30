@@ -1,12 +1,13 @@
 name: Flutter - Android-iOS Build AdHoc
-
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     branches:
+#       - main
 
 jobs:
   build:
@@ -53,7 +54,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: 3.27.3
+          flutter-version: 3.35.7
 
       - name: Install dependencies
         run: flutter pub get

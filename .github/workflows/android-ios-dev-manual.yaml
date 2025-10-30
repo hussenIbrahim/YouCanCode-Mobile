@@ -1,17 +1,18 @@
 name: Flutter - Android-iOS Manual Build Dev
-
 on:
   workflow_dispatch:
-    inputs:
-      branch: 
-        description: 'select your branch'
-        required: true
-        default: 'dev'
-        type: choice
-        options:
-          - dev
-          - main
-          - qa
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       branch: 
+#         description: 'select your branch'
+#         required: true
+#         default: 'dev'
+#         type: choice
+#         options:
+#           - dev
+#           - main
+#           - qa
 
 jobs:
   build:
@@ -35,7 +36,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: 3.27.3
+          flutter-version: 3.35.7
 
       - name: Install dependencies
         run: flutter pub get
