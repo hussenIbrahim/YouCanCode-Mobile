@@ -22,14 +22,65 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
+      # 1. Caching for Android/Gradle dependencies (~/.gradle)
+      # Caches Gradle wrapper and dependency files, dramatically speeding up Android builds.
+      - name: Cache Android Dependencies (Gradle)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          # Key is based on the OS and the contents of the main Android build file
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      # 1.5. Caching for Android SDK/NDK components
+      # Caches downloaded SDK platforms, build tools, and the NDK installation.
+      - name: Cache Android SDK/NDK
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/lib/android/sdk/platforms
+            /usr/local/lib/android/sdk/build-tools
+            /usr/local/lib/android/sdk/ndk
+          # Key based on OS and main Android build requirements (changes in app/build.gradle usually mean new tools/platforms)
+          key: ${{ runner.os }}-android-sdk-${{ hashFiles('android/app/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-android-sdk-
+
       - name: Setup BASE URL File
         run: echo "${{ secrets.BASE_URL_FILE }}" | base64 --decode > lib/core/data/remote/base_url.dart
+
+      # 2. Caching for Flutter SDK
+      # Caches the downloaded Flutter SDK version for faster setup.
+      - name: Cache Flutter SDK
+        uses: actions/cache@v4
+        with:
+          # Use the path where flutter-action stores the SDK
+          path: /opt/hostedtoolcache/flutter
+          # Key uses the runner OS and the specific Flutter version defined below
+          key: ${{ runner.os }}-flutter-3.35.7
+          restore-keys: |
+            ${{ runner.os }}-flutter-
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           flutter-version: 3.35.7
+
+      # 3. Caching for Dart/Flutter dependencies (.pub-cache)
+      # Caches the packages downloaded by 'flutter pub get'.
+      - name: Cache Flutter dependencies (.pub-cache)
+        uses: actions/cache@v4
+        with:
+          # Uses the environment variable set by subosito/flutter-action for the pub cache path
+          path: ${{ env.PUB_CACHE }}
+          # Key is based on the OS and the contents of the pubspec.lock file
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
 
       - name: Install dependencies
         run: flutter pub get
@@ -48,6 +99,7 @@ jobs:
 
       - name: Build APK
         run: flutter build apk --debug --build-name=1.0.0 --build-number=1
+        
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
